@@ -169,3 +169,14 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Temporary folder
+tmp/
+save/*
+
+# Model files
+model_path/*/
+
+# data files
+dataset/*/
+dataset/*.csv
