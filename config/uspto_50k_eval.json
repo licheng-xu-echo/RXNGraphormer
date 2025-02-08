@@ -1,0 +1,1 @@
+{"trained_model_path":"./model_path/USPTO_50k","ckpt_file":"valid_checkpoint.pt","topk":10,"beam_size":30,"temperature":3.0,"n_best":30,"min_length":1,"max_length":512,"batch_size":284, "task":"sequence_generation"}

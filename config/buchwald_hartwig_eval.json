@@ -1,0 +1,1 @@
+{"trained_model_path":"./model_path/buchwald_harwig/seed0","ckpt_file":"valid_checkpoint.pt","scale":100,"yield_constrain":true,"task":"regression"}
