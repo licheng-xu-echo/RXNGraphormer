@@ -1,0 +1,5 @@
+COCc1cccc(-c2cc3c(c4c2OP(=O)(O)Oc2c(-c5cccc(COC)c5)cc5c(c2-4)CCCC5)CCCC3)c1.O=C(/N=C/c1ccccc1)c1ccccc1.Sc1ccccc1>>O=C(NC(Sc1ccccc1)c1ccccc1)c1ccccc1
+FC(F)(F)c1ccsc1.[CH2]C(F)(F)F>>FC(F)(F)Cc1cc(C(F)(F)F)cs1
+CC(C)c1cc(C(C)C)c(-c2ccccc2P(C2CCCCC2)C2CCCCC2)c(C(C)C)c1.CN(C)C(=NC(C)(C)C)N(C)C.Cc1ccc(N)cc1.FC(F)(F)c1ccc(I)cc1.c1ccc(-c2ccon2)cc1>>Cc1ccc(Nc2ccc(C(F)(F)F)cc2)cc1
+CC(C)c1cc(C(C)C)c(-c2ccccc2P(C(C)(C)C)C(C)(C)C)c(C(C)C)c1.CCN=P(N=P(N(C)C)(N(C)C)N(C)C)(N(C)C)N(C)C.CCOC(=O)c1cc(C)on1.Cc1ccc(N)cc1.FC(F)(F)c1ccc(I)cc1>>Cc1ccc(Nc2ccc(C(F)(F)F)cc2)cc1
+C1CCOC1.CC(=O)[O-].CC(=O)[O-].CC1(C)c2cccc(P(c3ccccc3)c3ccccc3)c2Oc2c(P(c3ccccc3)c3ccccc3)cccc21.CCN(CC)CC.Cc1ccc2c(cnn2C2CCCCO2)c1[B-](F)(F)F.O=S(=O)(Oc1ccc2ncccc2c1)C(F)(F)F.[K+].[Pd+2]>>Cc1ccc2c(cnn2C2CCCCO2)c1-c1ccc2ncccc2c1
