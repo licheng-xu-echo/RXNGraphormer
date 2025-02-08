@@ -25,12 +25,31 @@ pip install localmapper==0.1.4             # to generate delta-mol graph
 pip install .
 ```
 
-### Download pretrained model weights and dataset
+### Download model weights and dataset
 
-Download pretrained models:
+All model weights and preprocessed datasets are available via our [figshare repository](https://figshare.com/s/decc64a868ab64a93099). Please put these files in `model_path` and `dataset` folders, like the following structure:
 
-```bash
-wget xxxxxxx
+```
+RXNGraphormer
+|── rxngraphormer
+├── model_path
+│   ├── buchwald_harwig
+|   ├── C_H_func
+|   ├── pretrained_classification_model
+|   ├── suzuki_miyaura
+│   ├── thiol_addition
+|   ├── USPTO_50k
+|   ├── USPTO_480k
+|   └── ...
+|── dataset
+│   ├── 50k_with_rxn_type
+│   ├── OOS
+│   ├── pretrain
+│   ├── USPTO_50k
+│   ├── USPTO_480k
+│   ├── USPTO_full
+│   └── ...
+|── ...
 ```
 
 ### Basic Usage
@@ -94,7 +113,7 @@ rxn_emb_finetuned = rxnemb_calc_finetuneed.gen_rxn_emb(["CC(C)c1cc(C(C)C)c(-c2cc
 
 ## ⚛️ Model Training
 
-Although the script automatically preprocesses the data when you start the model training program, we recommend that you perform data preprocessing separately to avoid errors when using multi-gpu training models. Multi-gpu is usually used for model pretraining and fine-tuning for reaction synthesis planning tasks. 
+Although the script automatically preprocesses the data when you start the model training program, we recommend that you perform data preprocessing separately to avoid errors when using multi-gpu training models. Multi-gpu is usually used for model pretraining and fine-tuning for reaction synthesis planning tasks.
 
 In the pre-training task, multiple data sub-files are used to create training sets and validation sets. The `file_num_trunck` parameter in the json file can control how many sub-files are used. If it is set to `0`, all sub-files are used.
 
