@@ -1,6 +1,6 @@
 # RXNGraphormer
 
-[![Python 3.8](https://img.shields.io/badge/python-3.8-blue)](https://www.python.org/) [![PyTorch 1.12.1+cu113](https://img.shields.io/badge/PyTorch-1.12.1%2Bcu113-red)](https://pytorch.org/) [![PyG 2.3.1](https://img.shields.io/badge/torch__geometric-2.3.1-green)](https://pytorch-geometric.readthedocs.io/) [![RDKit](https://img.shields.io/badge/Chemoinformatics-RDKit-blueviolet)](https://www.rdkit.org/) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Python 3.8](https://img.shields.io/badge/python-3.8-blue)](https://www.python.org/) [![PyTorch 1.12.1+cu113](https://img.shields.io/badge/PyTorch-1.12.1%2Bcu113-red)](https://pytorch.org/) [![PyG 2.3.1](https://img.shields.io/badge/torch__geometric-2.3.1-green)](https://pytorch-geometric.readthedocs.io/) [![RDKit](https://img.shields.io/badge/Chemoinformatics-RDKit-blueviolet)](https://www.rdkit.org/) 
 
 Official implementation of *"A unified pre-trained deep learning framework for cross-task reaction performance prediction and synthesis planning"* (under review)
 
