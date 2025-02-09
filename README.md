@@ -33,21 +33,21 @@ All model weights and preprocessed datasets are available via our [figshare repo
 RXNGraphormer
 |── rxngraphormer
 ├── model_path
-│   ├── buchwald_harwig
-|   ├── C_H_func
-|   ├── pretrained_classification_model
-|   ├── suzuki_miyaura
-│   ├── thiol_addition
-|   ├── USPTO_50k
-|   ├── USPTO_480k
+│   ├── buchwald_harwig/
+|   ├── C_H_func/
+|   ├── pretrained_classification_model/
+|   ├── suzuki_miyaura/
+│   ├── thiol_addition/
+|   ├── USPTO_50k/
+|   ├── USPTO_480k/
 |   └── ...
 |── dataset
-│   ├── 50k_with_rxn_type
-│   ├── OOS
-│   ├── pretrain
-│   ├── USPTO_50k
-│   ├── USPTO_480k
-│   ├── USPTO_full
+│   ├── 50k_with_rxn_type/
+│   ├── OOS/
+│   ├── pretrain/
+│   ├── USPTO_50k/
+│   ├── USPTO_480k/
+│   ├── USPTO_full/
 │   └── ...
 |── ...
 ```
