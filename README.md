@@ -118,7 +118,7 @@ Although the script automatically preprocesses the data when you start the model
 In the pre-training task, multiple data sub-files are used to create training sets and validation sets. The `file_num_trunck` parameter in the json file can control how many sub-files are used. If it is set to `0`, all sub-files are used.
 
 ```bash
-python data_preprocess.py --config_json ./config/pretrain_parameters.json                                                                         # pretrain data preprocessing
+python data_preprocess.py --config_json ./config/pretrain_parameters.json                                                                         # preprocess pretraining data 
 CUDA_VISIBLE_DEVICES="0,1" python -m torch.distributed.launch --nproc_per_node 2 train_model.py --config_json ./config/pretrain_parameters.json   # pretrain model with multi-gpu
 python train_model.py --config_json ./config/C_H_func_parameters.json                                                                             # finetune regression model
 python train_model.py --config_json ./config/uspto_50k_parameters.json                                                                            # finetune sequence genration model
