@@ -8,7 +8,7 @@ setup(
     url="https://github.com/licheng-xu-echo/RXNGraphormer",
     author="Li-Cheng Xu",
     author_email="xulicheng@sais.com.cn",
-    license="Apache License 2.0",
+    license="MIT License",
     packages=find_packages(),
     install_package_data=True,
     zip_safe=False,
