@@ -20,8 +20,7 @@ Official implementation of *"A unified pre-trained deep learning framework for c
 ```bash
 conda create -n rxngraphormer python=3.8
 conda activate rxngraphormer
-pip install -r requirements.txt
-pip install localmapper==0.1.4             # to generate delta-mol graph
+pip install -r requirements.txt -f https://data.pyg.org/whl/torch-1.12.0+cu113.html --extra-index-url https://download.pytorch.org/whl/cu113
 pip install .
 ```
 
