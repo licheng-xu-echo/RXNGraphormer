@@ -68,6 +68,8 @@ thiol_add_model_path = "./model_path/thiol_addition/seed0"
 rxn_smiles_lst = ["COCc1cccc(-c2cc3c(c4c2OP(=O)(O)Oc2c(-c5cccc(COC)c5)cc5c(c2-4)CCCC5)CCCC3)c1.O=C(/N=C/c1ccccc1)c1ccccc1.Sc1ccccc1>>O=C(NC(Sc1ccccc1)c1ccccc1)c1ccccc1",
                   "COCc1cccc(-c2cc3ccccc3c3c2OP(=O)(O)Oc2c(-c4cccc(COC)c4)cc4ccccc4c2-3)c1.O=C(/N=C/c1cccc2ccccc12)c1ccccc1.SC1CCCCC1>>O=C(NC(SC1CCCCC1)c1cccc2ccccc12)c1ccccc1"]
 thiol_add_sel_preds = reaction_prediction(thiol_add_model_path,rxn_smiles_lst,task_type="selectivity")
+
+# It takes about 25 seconds to predict 100 reactions on a single AMD 7735HS CPU without GPU.
 ```
 
 **Reaction synthesis planning prediction**
@@ -88,6 +90,8 @@ rct_smiles_lst = ['C1CCOC1.CC(C)C[Mg+].CON(C)C(=O)c1ccc(O)nc1.[Cl-]',
                   'CN.O.O=C(O)c1ccc(Cl)c([N+](=O)[O-])c1',
                   'CCn1cc(C(=O)O)c(=O)c2cc(F)c(-c3ccc(N)cc3)cc21.O=CO']
 pdt_preds = reaction_prediction(uspto_480k_model_path, rct_smiles_lst, task_type="forward-synthesis")
+
+# It takes about 40 seconds to predict 100 reactions on a single AMD 7735HS CPU without GPU.
 ```
 
 **Reaction embeddings generation**
