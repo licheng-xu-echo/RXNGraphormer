@@ -7,7 +7,7 @@ def read_requirements():
         return [line.strip() for line in f if line.strip() and not line.startswith('#')]
 setup(
     name="rxngraphormer",
-    version="0.6.1",
+    version="0.6.2",
     description="Package for a novel graph-based transformer model for reaction prediction",
     keywords=[],
     url="https://github.com/licheng-xu-echo/RXNGraphormer",
