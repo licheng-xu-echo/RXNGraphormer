@@ -20,6 +20,13 @@ Official implementation of *"A unified pre-trained deep learning framework for c
 ```bash
 conda create -n rxngraphormer python=3.8
 conda activate rxngraphormer
+
+# option 1: install pre-built package (recommended)
+pip install rxngraphormer -i https://pypi.org/simple -f https://data.pyg.org/whl/torch-1.12.0+cu113.html --extra-index-url https://download.pytorch.org/whl/cu113
+
+# option 2: install from source (development mode)
+git clone https://github.com/licheng-xu-echo/RXNGraphormer.git
+cd RXNGraphormer/
 pip install -r requirements.txt -f https://data.pyg.org/whl/torch-1.12.0+cu113.html --extra-index-url https://download.pytorch.org/whl/cu113
 pip install .
 ```
