@@ -31,6 +31,8 @@ pip install -r requirements.txt -f https://data.pyg.org/whl/torch-1.12.0+cu113.h
 pip install .
 ```
 
+**Note:** All codes were tested under Ubuntu 22.04.2 LTS
+
 ### Download model weights and dataset
 
 All model weights and preprocessed datasets are available via our [figshare repository](https://figshare.com/s/decc64a868ab64a93099). Please put these files in `model_path` and `dataset` folders, like the following structure:
