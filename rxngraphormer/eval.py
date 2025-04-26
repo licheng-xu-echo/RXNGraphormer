@@ -4,7 +4,7 @@ import numpy as np
 from rdkit import Chem
 from box import Box
 from .model import RXNGRegressor,RXNG2Sequencer,RXNGraphormer
-from .data import load_vocab,RXNG2SDataset,RXNDataset,get_idx_split,TripleDataset,triple_collate_fn,smi_tokenizer
+from .data import load_vocab,RXNG2SDataset,RXNDataset,get_idx_split,TripleDataset,PairDataset,triple_collate_fn,pair_collate_fn,smi_tokenizer
 from .utils import canonical_smiles,update_dict_key,align_config
 from torch_geometric.loader import DataLoader
 from sklearn.metrics import r2_score,mean_absolute_error
@@ -90,7 +90,7 @@ class SeqEval():
             print(f"Top-{i+1} Accuracy: {np.mean(self.accuracies[:, i])}")
         return accuracies
     
-def eval_regression_performance(pretrained_model_path,ckpt_file="valid_checkpoint.pt",scale=1.0,specific_val=False,yield_constrain=False):
+def eval_regression_performance(pretrained_model_path,ckpt_file="valid_checkpoint.pt",scale=1.0,specific_val=False,yield_constrain=False,return_train_results=False):
     pretrained_para_json = f"{pretrained_model_path}/parameters.json"
     with open(pretrained_para_json,'r') as fr:
         pretrained_config_dict = json.load(fr)
@@ -98,33 +98,6 @@ def eval_regression_performance(pretrained_model_path,ckpt_file="valid_checkpoin
 
     ckpt_file = f"{pretrained_model_path}/model/{ckpt_file}"
     ckpt_inf = torch.load(ckpt_file,map_location=device)
-
-    '''
-    model = RXNGRegressor(emb_dim=pretrained_config.model.emb_dim,
-                        gnn_type=pretrained_config.model.gnn_type,
-                        gnn_aggr=pretrained_config.model.gnn_aggr,
-                        gnum_layer=pretrained_config.model.gnn_num_layer,
-                        node_readout=pretrained_config.model.node_readout,
-                        num_heads=pretrained_config.model.num_heads,
-                        JK=pretrained_config.model.gnn_jk,
-                        graph_pooling=pretrained_config.model.graph_pooling,
-                        tnum_layer=pretrained_config.model.trans_num_layer,
-                        trans_readout=pretrained_config.model.trans_readout,
-                        onum_layer=pretrained_config.model.output_num_layer,
-                        drop_ratio=pretrained_config.model.drop_ratio,
-                        output_size=1,
-                        output_norm=eval(pretrained_config.model.output_norm),
-                        split_process=True,
-                        split_merge_method=pretrained_config.model.split_merge_method,
-                        output_act_func=pretrained_config.model.output_act_func,
-                        rct_batch_norm=eval(pretrained_config.model.rct_batch_norm),
-                        pdt_batch_norm=eval(pretrained_config.model.pdt_batch_norm),
-                        use_mid_inf=pretrained_config.model.use_mid_inf,
-                        pretrained_mid_encoder=None,
-                        mid_iteract_method=pretrained_config.model.mid_iteract_method,
-                        mid_batch_norm=eval(pretrained_config.model.mid_batch_norm),
-                        mid_layer_num=pretrained_config.model.mid_layer_num)
-    '''
     
     input_param = {"emb_dim":pretrained_config.model.emb_dim,
                     "gnn_type":pretrained_config.model.gnn_type,
@@ -145,7 +118,7 @@ def eval_regression_performance(pretrained_model_path,ckpt_file="valid_checkpoin
                     "output_act_func":pretrained_config.model.output_act_func,
                     "rct_batch_norm":eval(pretrained_config.model.rct_batch_norm),
                     "pdt_batch_norm":eval(pretrained_config.model.pdt_batch_norm),
-                    "use_mid_inf":pretrained_config.model.use_mid_inf,
+                    "use_mid_inf":eval(pretrained_config.model.use_mid_inf),
                     "mid_iteract_method":pretrained_config.model.mid_iteract_method,
                     "mid_batch_norm":eval(pretrained_config.model.mid_batch_norm),
                     "mid_layer_num":pretrained_config.model.mid_layer_num}
@@ -167,15 +140,25 @@ def eval_regression_performance(pretrained_model_path,ckpt_file="valid_checkpoin
         test_pdt_dataset = pdt_dataset[split_ids_map['test']]
         test_mid_dataset = mid_dataset[split_ids_map['test']]
         test_dataset = TripleDataset(test_rct_dataset,test_pdt_dataset,test_mid_dataset)
-
         test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=pretrained_config.data.batch_size, shuffle=False,collate_fn=triple_collate_fn)
+        if return_train_results:
+            train_rct_dataset = rct_dataset[split_ids_map['train']]
+            train_pdt_dataset = pdt_dataset[split_ids_map['train']]
+            train_mid_dataset = mid_dataset[split_ids_map['train']]
+            train_dataset = TripleDataset(train_rct_dataset,train_pdt_dataset,train_mid_dataset)
+            train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=pretrained_config.data.batch_size, shuffle=False,collate_fn=triple_collate_fn)
     else:
         test_rct_dataset = RXNDataset(root=pretrained_config.data.data_path,name=pretrained_config.data.test_rct_data_file,trunck=pretrained_config.data.data_trunck)
         test_pdt_dataset = RXNDataset(root=pretrained_config.data.data_path,name=pretrained_config.data.test_pdt_data_file,trunck=pretrained_config.data.data_trunck)
         test_mid_dataset = RXNDataset(root=pretrained_config.data.data_path,name=pretrained_config.data.test_mid_data_file,trunck=pretrained_config.data.data_trunck)
         test_dataset = TripleDataset(test_rct_dataset,test_pdt_dataset,test_mid_dataset)
         test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=pretrained_config.data.batch_size, shuffle=False,collate_fn=triple_collate_fn)
-
+        if return_train_results:
+            train_rct_dataset = RXNDataset(root=pretrained_config.data.data_path,name=pretrained_config.data.train_rct_data_file,trunck=pretrained_config.data.data_trunck)
+            train_pdt_dataset = RXNDataset(root=pretrained_config.data.data_path,name=pretrained_config.data.train_pdt_data_file,trunck=pretrained_config.data.data_trunck)
+            train_mid_dataset = RXNDataset(root=pretrained_config.data.data_path,name=pretrained_config.data.train_mid_data_file,trunck=pretrained_config.data.data_trunck)
+            train_dataset = TripleDataset(train_rct_dataset,train_pdt_dataset,train_mid_dataset)
+            train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=pretrained_config.data.batch_size, shuffle=False,collate_fn=triple_collate_fn)
     preds = torch.Tensor([]).to(device)
     targets = torch.Tensor([]).to(device)
     with torch.no_grad():
@@ -203,6 +186,37 @@ def eval_regression_performance(pretrained_model_path,ckpt_file="valid_checkpoin
     targets = targets * scale
     r2 = r2_score(targets,preds)
     mae = mean_absolute_error(targets,preds)
+
+    if return_train_results:
+        train_preds = torch.Tensor([]).to(device)
+        train_targets = torch.Tensor([]).to(device)
+        with torch.no_grad():
+            for step, batch_data in enumerate(train_dataloader):
+                if not eval(pretrained_config.model.use_mid_inf):
+                    rct_data,pdt_data = batch_data
+                    rct_data = rct_data.to(device)
+                    pdt_data = pdt_data.to(device)
+                    out = model([rct_data,pdt_data])
+                else:
+                    rct_data,pdt_data,mid_data = batch_data
+                    rct_data = rct_data.to(device)
+                    pdt_data = pdt_data.to(device)
+                    mid_data = mid_data.to(device)
+                    out = model([rct_data,pdt_data,mid_data])
+                train_preds = torch.cat([train_preds, out.detach_()], dim=0)
+                train_targets = torch.cat([train_targets, rct_data.y.unsqueeze(1)], dim=0)
+        train_targets = train_targets.cpu()
+        train_preds = train_preds.cpu()
+        if yield_constrain:
+            train_preds = torch.where(train_preds < 0, torch.tensor(0.0), train_preds)
+            train_preds = torch.where(train_preds > 1, torch.tensor(1.0), train_preds)
+
+        train_preds = train_preds * scale
+        train_targets = train_targets * scale
+        train_r2 = r2_score(train_targets,train_preds)
+        train_mae = mean_absolute_error(train_targets,train_preds)
+        return train_r2,train_mae,train_preds,train_targets,r2,mae,preds,targets
+
     return r2,mae,preds,targets
 
 def load_pred_model(pretrained_model_path,ckpt_filename="valid_checkpoint.pt",task_type="reactivity"):
@@ -216,34 +230,7 @@ def load_pred_model(pretrained_model_path,ckpt_filename="valid_checkpoint.pt",ta
     ckpt_file = f"{pretrained_model_path}/model/{ckpt_filename}"
     ckpt_inf = torch.load(ckpt_file,map_location=device)
     if task_type in ["reactivity","selectivity"]:
-        '''
-        model = RXNGRegressor(emb_dim=pretrained_config.model.emb_dim,
-                            gnn_type=pretrained_config.model.gnn_type,
-                            gnn_aggr=pretrained_config.model.gnn_aggr,
-                            gnum_layer=pretrained_config.model.gnn_num_layer,
-                            node_readout=pretrained_config.model.node_readout,
-                            num_heads=pretrained_config.model.num_heads,
-                            JK=pretrained_config.model.gnn_jk,
-                            graph_pooling=pretrained_config.model.graph_pooling,
-                            tnum_layer=pretrained_config.model.trans_num_layer,
-                            trans_readout=pretrained_config.model.trans_readout,
-                            onum_layer=pretrained_config.model.output_num_layer,
-                            drop_ratio=pretrained_config.model.drop_ratio,
-                            output_size=1,
-                            output_norm=eval(pretrained_config.model.output_norm),
-                            split_process=True,
-                            split_merge_method=pretrained_config.model.split_merge_method,
-                            output_act_func=pretrained_config.model.output_act_func,
-                            rct_batch_norm=eval(pretrained_config.model.rct_batch_norm),
-                            pdt_batch_norm=eval(pretrained_config.model.pdt_batch_norm),
-                            use_mid_inf=pretrained_config.model.use_mid_inf,
-                            pretrained_mid_encoder=None,
-                            mid_iteract_method=pretrained_config.model.mid_iteract_method,
-                            mid_batch_norm=eval(pretrained_config.model.mid_batch_norm),
-                            mid_layer_num=pretrained_config.model.mid_layer_num)
-        '''
         
-
         input_param = {"emb_dim":pretrained_config.model.emb_dim,
                         "gnn_type":pretrained_config.model.gnn_type,
                         "gnn_aggr":pretrained_config.model.gnn_aggr,
@@ -263,7 +250,7 @@ def load_pred_model(pretrained_model_path,ckpt_filename="valid_checkpoint.pt",ta
                         "output_act_func":pretrained_config.model.output_act_func,
                         "rct_batch_norm":eval(pretrained_config.model.rct_batch_norm),
                         "pdt_batch_norm":eval(pretrained_config.model.pdt_batch_norm),
-                        "use_mid_inf":pretrained_config.model.use_mid_inf,
+                        "use_mid_inf":eval(pretrained_config.model.use_mid_inf),
                         "mid_iteract_method":pretrained_config.model.mid_iteract_method,
                         "mid_batch_norm":eval(pretrained_config.model.mid_batch_norm),
                         "mid_layer_num":pretrained_config.model.mid_layer_num}
