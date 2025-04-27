@@ -1,9 +1,10 @@
-Please download the `model.zip` from the [figshare](https://figshare.com/ndownloader/files/52216991?private_link=decc64a868ab64a93099). Unzip the file and put model weight files into the this folder following the structure below:
+Please download `buchwald_hartwig.zip`, `C_H_func.zip`, `external_validation.zip`, `pretrained_classification_model.zip`, `suzuki_miyaura.zip`, `thiol_addition.zip`, `USPTO_50k_model.zip`, `USPTO_480k_model.zip`, `USPTO_full_model.zip`, and `USPTO_STEREO_model.zip` of trained models from the [figshare](https://figshare.com/ndownloader/files/52216991?private_link=decc64a868ab64a93099). Unzip the file and put model weight files into the this folder following the structure below:
 
 ```
 model_path/
-├── buchwald_harwig/
+├── buchwald_hartwig/
 │── C_H_func/
+│── external_validation/
 │── pretrained_classification_model/
 │── suzuki_miyaura/
 │── thiol_addition/
