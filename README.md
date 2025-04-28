@@ -7,11 +7,11 @@ Official implementation of *"A unified pre-trained deep learning framework for c
 ## 📌 Key Features
 
 - **Unified Architecture**: Integrates graph neural networks with Transformer to capture both intra and inter-molecular information.
-- **Pre-trained Model**: Chemical-aware pre-training on 13M reaction data
+- **Pre-trained Model**: A pre-trained model that learns chemical bond transformation patterns from 13 million reactions.
 - **Cross-task Reaction Prediction**: Simultaneous handling of:
   - Yield, regioselectivity and enantioselectivity estimation (regression)
   - Forward- and retro-synthesis planning (sequence generation)
-- **Performance**: RXNGraphormer achieves state-of-the-art performance on 21 of 23 metrics across eight benchmark datasets for reactivity/selectivity prediction and forward-/retro-synthesis planning.
+- **Performance**: RXNGraphormer achieves state-of-the-art performance across eight benchmark datasets for reactivity/selectivity prediction and forward-/retro-synthesis planning, as well as three external realistic datasets for reactivity and selectivity prediction.
 
 ## 🚀 Quick Start
 
