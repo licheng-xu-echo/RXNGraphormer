@@ -41,7 +41,7 @@ All model weights and preprocessed datasets are available via our [figshare repo
 RXNGraphormer
 |── rxngraphormer
 ├── model_path
-│   ├── buchwald_harwig/
+│   ├── buchwald_hartwig/
 |   ├── C_H_func/
 |   ├── pretrained_classification_model/
 |   ├── suzuki_miyaura/
@@ -68,7 +68,7 @@ RXNGraphormer
 ```python3
 from rxngraphormer.eval import reaction_prediction
 # reactivity prediction
-bh_model_path = "./model_path/buchwald_harwig/seed0"
+bh_model_path = "./model_path/buchwald_hartwig/seed0"
 rxn_smiles_lst = ["CC(C)c1cc(C(C)C)c(-c2ccccc2P(C2CCCCC2)C2CCCCC2)c(C(C)C)c1.CN(C)C(=NC(C)(C)C)N(C)C.Cc1ccc(N)cc1.FC(F)(F)c1ccc(I)cc1.c1ccc(-c2ccon2)cc1>>Cc1ccc(Nc2ccc(C(F)(F)F)cc2)cc1",
                   "CC(C)c1cc(C(C)C)c(-c2ccccc2P(C2CCCCC2)C2CCCCC2)c(C(C)C)c1.CCOC(=O)c1cc(C)on1.CN(C)C(=NC(C)(C)C)N(C)C.Cc1ccc(N)cc1.FC(F)(F)c1ccc(Cl)cc1>>Cc1ccc(Nc2ccc(C(F)(F)F)cc2)cc1"]
 bh_react_preds = reaction_prediction(bh_model_path,rxn_smiles_lst,task_type="reactivity")
@@ -117,7 +117,7 @@ rxn_emb_pretrained = rxnemb_calc_pretrained.gen_rxn_emb(["C1CCCCC1.CCO.CS(=O)(=O
                                               "COc1ccc(-c2coc3ccc(-c4nnc(S)o4)cc23)cc1.COc1ccc(CCl)cc1F>>COc1ccc(-c2coc3ccc(-c4nnc(SCc5ccc(OC)c(F)c5)o4)cc23)cc1"])
 
 # base on finetuned model
-finetune_model_path = "./model_path/buchwald_harwig/seed0"
+finetune_model_path = "./model_path/buchwald_hartwig/seed0"
 rxnemb_calc_finetuneed = RXNEMB(pretrained_model_path=finetune_model_path,model_type="regressor")
 rxn_emb_finetuned = rxnemb_calc_finetuneed.gen_rxn_emb(["CC(C)c1cc(C(C)C)c(-c2ccccc2P(C2CCCCC2)C2CCCCC2)c(C(C)C)c1.CN(C)C(=NC(C)(C)C)N(C)C.Cc1ccc(N)cc1.FC(F)(F)c1ccc(I)cc1.c1ccc(-c2ccon2)cc1>>Cc1ccc(Nc2ccc(C(F)(F)F)cc2)cc1",
                                                         "CCN=P(N=P(N(C)C)(N(C)C)N(C)C)(N(C)C)N(C)C.COc1ccc(OC)c(P([C@]23C[C@H]4C[C@H](C[C@H](C4)C2)C3)[C@]23C[C@H]4C[C@H](C[C@H](C4)C2)C3)c1-c1c(C(C)C)cc(C(C)C)cc1C(C)C.Cc1ccc(N)cc1.Ic1cccnc1.c1ccc(-c2ccon2)cc1>>Cc1ccc(Nc2cccnc2)cc1",
