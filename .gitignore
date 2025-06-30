@@ -180,3 +180,4 @@ model_path/*/
 # data files
 dataset/*/
 dataset/*.csv
+notebook/*.png
