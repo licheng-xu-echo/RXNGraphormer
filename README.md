@@ -35,7 +35,7 @@ pip install .
 
 ### Download model weights and dataset
 
-All model weights and preprocessed datasets are available via our [figshare repository](https://figshare.com/s/decc64a868ab64a93099). Please put these files in `model_path` and `dataset` folders, like the following structure:
+All model weights and preprocessed datasets are available via our [figshare repository](https://doi.org/10.6084/m9.figshare.28356077). Please put these files in `model_path` and `dataset` folders, like the following structure:
 
 ```
 RXNGraphormer

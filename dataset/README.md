@@ -1,4 +1,4 @@
-Please download the `USPTO_STEREO.zip`, `USPTO_full.zip`, `USPTO_480k.zip`, `USPTO_50k.zip`, `pretrain.zip`, `OOS.zip`, `external_validation_dataset.zip`, `benmark_dataset.zip`, and `50k_with_rxn_type.zip` from the [figshare](https://figshare.com/s/decc64a868ab64a93099). Unzip the file and put dataset files into the this folder following the structure below:
+Please download the `USPTO_STEREO.zip`, `USPTO_full.zip`, `USPTO_480k.zip`, `USPTO_50k.zip`, `pretrain.zip`, `OOS.zip`, `external_validation_dataset.zip`, `benmark_dataset.zip`, and `50k_with_rxn_type.zip` from the [figshare](https://doi.org/10.6084/m9.figshare.28356077). Unzip the file and put dataset files into the this folder following the structure below:
 
 ```
 dataset/
