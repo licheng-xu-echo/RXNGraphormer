@@ -150,4 +150,9 @@ Here we provide a [notebook](https://github.com/licheng-xu-echo/RXNGraphormer/bl
 
 ## 📚 Citation
 
-Before the paper is formally published, please cite the following preprint: https://doi.org/10.21203/rs.3.rs-5994908/v1
+~~Before the paper is formally published, please cite the following preprint: https://doi.org/10.21203/rs.3.rs-5994908/v1~~
+Please cite the following paper: Xu, LC., Tang, MJ., An, J. et al. A unified pre-trained deep learning framework for cross-task reaction performance prediction and synthesis planning. *Nat. Mach. Intell.* (2025). https://doi.org/10.1038/s42256-025-01098-4
+
+## Contact with us
+
+If you have any questions, please contact us via email: xulicheng@sais.com.cn.
