@@ -155,4 +155,4 @@ Please cite the following paper: Xu, LC., Tang, MJ., An, J. et al. A unified pre
 
 ## Contact with us
 
-If you have any questions, please contact us via email: xulicheng@sais.com.cn.
+If you have any questions, please contact us via email: xulicheng@sais.org.cn or lcxu1997@gmail.com.
