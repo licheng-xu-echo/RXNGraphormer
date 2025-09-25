@@ -36,7 +36,7 @@ pip install .
 
 ### Download model weights and dataset
 
-All model weights and preprocessed datasets are available via our [figshare repository](https://doi.org/10.6084/m9.figshare.28356077) ~~(before the manuscript is formally published, please vist the private [link](https://figshare.com/s/decc64a868ab64a93099))~~. Please put these files in `model_path` and `dataset` folders, like the following structure:
+All model weights and preprocessed datasets are available via our [figshare repository](https://doi.org/10.6084/m9.figshare.28356077). Please put these files in `model_path` and `dataset` folders, like the following structure:
 
 ```
 RXNGraphormer
@@ -151,8 +151,7 @@ Here we provide a [notebook](https://github.com/licheng-xu-echo/RXNGraphormer/bl
 
 ## 📚 Citation
 
-~~Before the paper is formally published, please cite the following preprint: https://doi.org/10.21203/rs.3.rs-5994908/v1~~
-Please cite the following paper: Xu, LC., Tang, MJ., An, J. et al. A unified pre-trained deep learning framework for cross-task reaction performance prediction and synthesis planning. *Nat. Mach. Intell.* (2025). https://doi.org/10.1038/s42256-025-01098-4
+Please cite the following paper: Xu, LC., Tang, MJ., An, J. et al. A unified pre-trained deep learning framework for cross-task reaction performance prediction and synthesis planning. *Nat. Mach. Intell.* **2025**, *7*, 1561.
 
 ## Contact with us
 
