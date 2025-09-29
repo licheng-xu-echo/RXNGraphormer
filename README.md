@@ -32,16 +32,14 @@ We plan to resolve the NumPy version restriction and upgrade to NumPy 2+ in the 
 ```bash
 conda create -n rxngraphormer python=3.10
 conda activate rxngraphormer
-
-# option 1: install based on requirements
 git clone -b pytorch2 https://github.com/licheng-xu-echo/RXNGraphormer.git
 cd RXNGraphormer/
+
+# option 1: install based on requirements
 pip install -r requirements_pt221.txt -f https://data.pyg.org/whl/torch-2.2.0+cu121.html --extra-index-url https://download.pytorch.org/whl/cu121
 pip install .
 
 # option 2: Install important package one by one to avoid fixing the versions of all the packages.
-git clone -b pytorch2 https://github.com/licheng-xu-echo/RXNGraphormer.git
-cd RXNGraphormer/
 pip install torch==2.2.1 --index-url https://download.pytorch.org/whl/cu121
 pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.2.0+cu121.html
 pip install rdkit==2024.3.2 ipykernel pandas python-box OpenNMT-py==1.2.0 torchdata==0.7.1 torch_geometric rxnmapper localmapper transformers==4.30.0 numpy==1.26.4 scikit-learn
