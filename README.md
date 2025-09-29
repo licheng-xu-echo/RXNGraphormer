@@ -8,7 +8,7 @@ Official implementation of *"A unified pre-trained deep learning framework for c
 ## Pytorch 2 support
 We have added support for PyTorch 2+ to the RXNGraphormer project. The current testing environment includes Python 3.10 and PyTorch 2.2.1. During environment setup, we identified and addressed several potential code conflicts:
 ​​
-- The current code relies on localmapper(a dependency for calculating delta-mol) which depends on DGL. However, the version of DGL (2.1.0) automatically installed with localmapperdoes not support NumPy 2+. Consequently, we have pinned the NumPy version to the latest release in the 1.x series.
+- The current code relies on localmapper(a dependency for calculating delta-mol) which depends on DGL. However, the version of DGL (2.1.0) automatically installed with localmapper does not support NumPy 2+. Consequently, we have pinned the NumPy version to the latest release in the 1.x series.
 
 - Due to interface naming constraints within RXNGraphormer, we have fixed the OpenNMT-py version to 1.2.0.
 
