@@ -1,11 +1,12 @@
+import os
 from box import Box
 import json,argparse
 from rxngraphormer.train import SPLITRegressorTrainer,SequenceTrainer,SPLITClassifierTrainer
-
+local_rank = int(os.environ.get("LOCAL_RANK", -1))
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_json', type=str, default='./config/C_H_func_parameters.json')
-    parser.add_argument("--local_rank", type=int, default=-1)
+    #parser.add_argument("--local_rank", type=int, default=-1)
     args = parser.parse_args()
     para_json = args.config_json
     with open(para_json,'r') as fr:
@@ -14,10 +15,10 @@ def main():
     if config.task == 'regression':
         trainer = SPLITRegressorTrainer(config)
     elif config.task == "sequence_generation":
-        config.others.local_rank = args.local_rank
+        config.others.local_rank = local_rank
         trainer = SequenceTrainer(config)
     elif config.task == "classification":
-        config.others.local_rank = args.local_rank
+        config.others.local_rank = local_rank
         trainer = SPLITClassifierTrainer(config)
     else:
         raise NotImplementedError

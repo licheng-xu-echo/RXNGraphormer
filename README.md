@@ -133,7 +133,7 @@ In the pre-training task, multiple data sub-files are used to create training se
 
 ```bash
 python data_preprocess.py --config_json ./config/pretrain_parameters.json                                                                         # preprocess pretraining data 
-CUDA_VISIBLE_DEVICES="0,1" python -m torch.distributed.launch --nproc_per_node 2 train_model.py --config_json ./config/pretrain_parameters.json   # pretrain model with multi-gpu
+CUDA_VISIBLE_DEVICES="0,1" torchrun --nproc_per_node=2 train_model.py --config_json ./config/pretrain_parameters.json   # pretrain model with multi-gpu
 python train_model.py --config_json ./config/C_H_func_parameters.json                                                                             # finetune regression model
 python train_model.py --config_json ./config/uspto_50k_parameters.json                                                                            # finetune sequence genration model
 ```
