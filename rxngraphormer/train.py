@@ -140,9 +140,9 @@ class SPLITClassifierTrainer():
             train_sampler = torch.utils.data.distributed.DistributedSampler(self.train_dataset, shuffle=True)
             valid_sampler = torch.utils.data.distributed.DistributedSampler(self.valid_dataset, shuffle=False)
             self.train_dataloader = DataLoader(self.train_dataset, batch_size=self.config.data.batch_size//self.device_num, sampler=train_sampler,
-                                            num_workers=2)
+                                            num_workers=0)
             self.valid_dataloader = DataLoader(self.valid_dataset, batch_size=self.config.data.batch_size//self.device_num, sampler=valid_sampler,
-                                            num_workers=2)
+                                            num_workers=0)
             
         if self.config.model.pretrained_model:
             pretrained_inf = torch.load(f'{self.config.model.pretrained_model}/model/valid_checkpoint.pt')
@@ -944,11 +944,11 @@ class SequenceTrainer():
             valid_sampler = torch.utils.data.distributed.DistributedSampler(self.valid_dataset, shuffle=False)
             test_sampler = torch.utils.data.distributed.DistributedSampler(self.test_dataset, shuffle=False)
             self.train_dataloader = DataLoader(self.train_dataset, batch_size=self.config.data.batch_size//dist.get_world_size(), sampler=train_sampler,
-                                            num_workers=2)
+                                            num_workers=0)
             self.valid_dataloader = DataLoader(self.valid_dataset, batch_size=self.config.data.batch_size//dist.get_world_size(), sampler=valid_sampler,
-                                            num_workers=2)
+                                            num_workers=0)
             self.test_dataloader = DataLoader(self.test_dataset, batch_size=self.config.data.batch_size//dist.get_world_size(), sampler=test_sampler,
-                                            num_workers=2)
+                                            num_workers=0)
         self.ground_truth_smiles_lst = ["".join([self.vocab_rev[idx] for idx in self.test_dataset[idx].tgt_token_ids[0][:int(self.test_dataset[idx].tgt_lens[0])-1]]) for idx in range(len(self.test_dataset))]
         self.total_step = 0
         self.accum = 0
