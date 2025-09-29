@@ -17,6 +17,6 @@ setup(
     packages=find_packages(),
     install_package_data=True,
     zip_safe=False,
-    install_requires=read_requirements(),
+    install_requires=[],
     package_data={"":["*.csv"]},
 )
