@@ -22,23 +22,6 @@ class SPLITClassifierTrainer():
         self.config = config
         self.multi_gpu = self.config.others.multi_gpu
         
-        '''
-        self.model = RXNGClassifier(emb_dim=self.config.model.emb_dim,
-                                    gnn_type=self.config.model.gnn_type,
-                                    gnn_aggr=self.config.model.gnn_aggr,
-                                    gnum_layer=self.config.model.gnn_num_layer,
-                                    node_readout=self.config.model.node_readout,
-                                    num_heads=self.config.model.num_heads,
-                                    JK=self.config.model.gnn_jk,
-                                    graph_pooling=self.config.model.graph_pooling,
-                                    tnum_layer=self.config.model.trans_num_layer,
-                                    trans_readout=self.config.model.trans_readout,
-                                    onum_layer=self.config.model.output_num_layer,
-                                    drop_ratio=self.config.model.drop_ratio,
-                                    output_size=2,split_process=True,
-                                    split_merge_method=self.config.model.split_merge_method,
-                                    output_act_func=self.config.model.output_act_func)
-        '''
         input_param = {"emb_dim":self.config.model.emb_dim,
                         "gnn_type":self.config.model.gnn_type,
                         "gnn_aggr":self.config.model.gnn_aggr,

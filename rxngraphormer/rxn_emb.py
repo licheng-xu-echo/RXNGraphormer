@@ -16,25 +16,6 @@ class RXNEMB():
         ckpt_file = f"{pretrained_model_path}/model/valid_checkpoint.pt"
         ckpt_inf = torch.load(ckpt_file,map_location=device)
         if model_type == "classifier":
-            '''
-            model = RXNGClassifier(emb_dim=pretrained_config.model.emb_dim,
-                                    gnn_type=pretrained_config.model.gnn_type,
-                                    gnn_aggr=pretrained_config.model.gnn_aggr,
-                                    gnum_layer=pretrained_config.model.gnn_num_layer,
-                                    node_readout=pretrained_config.model.node_readout,
-                                    num_heads=pretrained_config.model.num_heads,
-                                    JK=pretrained_config.model.gnn_jk,
-                                    graph_pooling=pretrained_config.model.graph_pooling,
-                                    tnum_layer=pretrained_config.model.trans_num_layer,
-                                    trans_readout=pretrained_config.model.trans_readout,
-                                    onum_layer=pretrained_config.model.output_num_layer,
-                                    drop_ratio=pretrained_config.model.drop_ratio,
-                                    output_size=2,split_process=True,
-                                    split_merge_method=pretrained_config.model.split_merge_method,
-                                    output_act_func=pretrained_config.model.output_act_func)
-            '''
-
-
             input_param = {"emb_dim":pretrained_config.model.emb_dim,
                             "gnn_type":pretrained_config.model.gnn_type,
                             "gnn_aggr":pretrained_config.model.gnn_aggr,
@@ -56,34 +37,7 @@ class RXNEMB():
 
 
         elif model_type == "regressor":
-            '''
-            model = RXNGRegressor(emb_dim=pretrained_config.model.emb_dim,
-                                gnn_type=pretrained_config.model.gnn_type,
-                                gnn_aggr=pretrained_config.model.gnn_aggr,
-                                gnum_layer=pretrained_config.model.gnn_num_layer,
-                                node_readout=pretrained_config.model.node_readout,
-                                num_heads=pretrained_config.model.num_heads,
-                                JK=pretrained_config.model.gnn_jk,
-                                graph_pooling=pretrained_config.model.graph_pooling,
-                                tnum_layer=pretrained_config.model.trans_num_layer,
-                                trans_readout=pretrained_config.model.trans_readout,
-                                onum_layer=pretrained_config.model.output_num_layer,
-                                drop_ratio=pretrained_config.model.drop_ratio,
-                                output_size=1,
-                                output_norm=eval(pretrained_config.model.output_norm),
-                                split_process=True,
-                                split_merge_method=pretrained_config.model.split_merge_method,
-                                output_act_func=pretrained_config.model.output_act_func,
-                                rct_batch_norm=eval(pretrained_config.model.rct_batch_norm),
-                                pdt_batch_norm=eval(pretrained_config.model.pdt_batch_norm),
-                                use_mid_inf=pretrained_config.model.use_mid_inf,
-                                pretrained_mid_encoder=None,
-                                mid_iteract_method=pretrained_config.model.mid_iteract_method,
-                                mid_batch_norm=eval(pretrained_config.model.mid_batch_norm),
-                                mid_layer_num=pretrained_config.model.mid_layer_num)
-            '''
-
-
+            
             input_param = {"emb_dim":pretrained_config.model.emb_dim,
                             "gnn_type":pretrained_config.model.gnn_type,
                             "gnn_aggr":pretrained_config.model.gnn_aggr,
@@ -247,3 +201,79 @@ class RXNEMB():
         half_rxn_emb = self.gen_half_rxn_mol_emb_from_dataset(root="./half_rxn_emb_tmp",name_regrex=f"{mol_type}_smiles_0.csv",mol_type=mol_type,batch_size=batch_size)
         shutil.rmtree("./half_rxn_emb_tmp")
         return half_rxn_emb
+
+class RXNClassifier():
+    def __init__(self,pretrained_model_path,random_init=False):
+        pretrained_para_json = f"{pretrained_model_path}/parameters.json"
+        with open(pretrained_para_json,'r') as fr:
+            pretrained_config_dict = json.load(fr)
+        pretrained_config = Box(pretrained_config_dict)
+        ckpt_file = f"{pretrained_model_path}/model/valid_checkpoint.pt"
+        ckpt_inf = torch.load(ckpt_file,map_location=device)
+
+        input_param = {"emb_dim":pretrained_config.model.emb_dim,
+                        "gnn_type":pretrained_config.model.gnn_type,
+                        "gnn_aggr":pretrained_config.model.gnn_aggr,
+                        "gnum_layer":pretrained_config.model.gnn_num_layer,
+                        "node_readout":pretrained_config.model.node_readout,
+                        "num_heads":pretrained_config.model.num_heads,
+                        "JK":pretrained_config.model.gnn_jk,
+                        "graph_pooling":pretrained_config.model.graph_pooling,
+                        "tnum_layer":pretrained_config.model.trans_num_layer,
+                        "trans_readout":pretrained_config.model.trans_readout,
+                        "onum_layer":pretrained_config.model.output_num_layer,
+                        "drop_ratio":pretrained_config.model.drop_ratio,
+                        "output_size":2,
+                        "split_process":True,
+                        "split_merge_method":pretrained_config.model.split_merge_method,
+                        "output_act_func":pretrained_config.model.output_act_func}
+        rxng = RXNGraphormer("classification",align_config(input_param,"classifier"),"")
+        model = rxng.get_model()
+        
+        if not random_init:
+            model.load_state_dict(update_dict_key(ckpt_inf["model_state_dict"]))
+        else:
+            print("[INFO] Randomly initialize model parameters")
+            for p in model.parameters():
+                if p.dim() > 1 and p.requires_grad:
+                    xavier_uniform_(p)
+            
+        model.to(device)
+        # model.eval()
+        self.model = model
+    
+    def rxn_pred(self,rxn_smiles_lst,batch_size=128):
+        assert len(rxn_smiles_lst) >= 2, "rxn_smiles_lst must contain at least 2 reactions"
+        rct_smi_lst = [f'{canonical_smiles(smi.split(">>")[0])},0' for smi in rxn_smiles_lst]
+        pdt_smi_lst = [f'{canonical_smiles(smi.split(">>")[1])},0' for smi in rxn_smiles_lst]
+        os.makedirs("./rxn_emb_tmp/",exist_ok=True)
+        with open("./rxn_emb_tmp/rct_smiles_0.csv","w") as fw:
+            fw.writelines("\n".join(rct_smi_lst))
+        with open("./rxn_emb_tmp/pdt_smiles_0.csv","w") as fw:
+            fw.writelines("\n".join(pdt_smi_lst))
+        rxn_preds,rxn_confidences = self.rxn_pred_from_dataset(root="./rxn_emb_tmp",rct_name_regrex="rct_smiles_0.csv",pdt_name_regrex="pdt_smiles_0.csv",batch_size=batch_size)
+        shutil.rmtree("./rxn_emb_tmp")
+        return rxn_preds,rxn_confidences
+    
+    def rxn_pred_from_dataset(self,root,
+                                 rct_name_regrex,
+                                 pdt_name_regrex,
+                                 batch_size=128):
+        rct_dataset = MultiRXNDataset(root=root, name_regrex=rct_name_regrex)
+        pdt_dataset = MultiRXNDataset(root=root, name_regrex=pdt_name_regrex)
+        pair_dataset = PairDataset(rct_dataset,pdt_dataset)
+        pair_dataloader = torch.utils.data.DataLoader(pair_dataset, batch_size=batch_size, shuffle=False,collate_fn=pair_collate_fn)
+        all_rxn_pred = []
+        all_rxn_confidence = []
+        print("[INFO] Predict whether the reaction is real...")
+        with torch.no_grad():
+            for data in tqdm(pair_dataloader):
+                rct_data,pdt_data = data
+                rct_data.to(device)
+                pdt_data.to(device)
+                out = self.model([rct_data,pdt_data])
+                preds = out.argmax(1)
+                confidence = out.max(1).values
+                all_rxn_pred.append(preds.detach().cpu())
+                all_rxn_confidence.append(confidence.detach().cpu())
+        return torch.cat(all_rxn_pred,dim=0),torch.cat(all_rxn_confidence,dim=0)
