@@ -127,6 +127,21 @@ rxn_emb_finetuned = rxnemb_calc_finetuneed.gen_rxn_emb(["CC(C)c1cc(C(C)C)c(-c2cc
                                                         "CC(C)c1cc(C(C)C)c(-c2ccccc2P(C2CCCCC2)C2CCCCC2)c(C(C)C)c1.CCc1ccc(I)cc1.CN1CCCN2CCCN=C12.Cc1ccc(N)cc1.c1ccc2oncc2c1>>CCc1ccc(Nc2ccc(C)cc2)cc1"])
 ```
 
+**Fictious reaction identification**
+
+```python3
+from rxngraphormer.rxn_emb import RXNClassifier
+pretrained_model_path = "./model_path/pretrained_classification_model"
+classifier = RXNClassifier(pretrained_model_path,random_init=False)
+
+# return predictions and confidences
+preds,confs = classifier.rxn_pred(["BrCc1ccccc1.CCOC(=O)C1(c2ccc(-c3ccc(-c4onc(C)c4CCO)cc3)cc2)CC1>>COCC(=O)C1(c2ccc(-c3ccc(-c4onc(C)c4CCOCc4ccccc4)cc3)cc2)CC1",
+                                   "Brc1cc2c(cc1CCCI)OCO2.CCOC1=CC(=O)CCC1>>CC(O)C1=CC(=O)C(CCCc2cc3c(cc2Br)OCO3)CC1",
+                                   "B.CC#N.CCOC(=O)C(Cc1ccc(OS(=O)(=O)C(F)(F)F)cc1)NC(=O)C(OC)(c1ccccc1)C(F)(F)F.CNC.O=C([O-])[O-].[K+].[K+].[Pd].c1ccc(P(c2ccccc2)c2ccccc2)cc1.c1ccc(P(c2ccccc2)c2ccccc2)cc1.c1ccc(P(c2ccccc2)c2ccccc2)cc1.c1ccc(P(c2ccccc2)c2ccccc2)cc1>>CCOC(=O)C(Cc1ccccc1)NC(=O)C(OC)(c1ccccc1)C(F)(F)F",
+                                   "Br.CC[C@@H](c1cccc(OCc2ccccc2)c1)[C@@H](C)CO.ClCCl.O>>CC[C@@H](c1cccc(OCc2ccccc2)c1)[C@@H](C)CBr"]) 
+```
+
+
 ## ⚛️ Model Training
 
 Although the script automatically preprocesses the data when you start the model training program, we recommend that you perform data preprocessing separately to avoid errors when using multi-gpu training models. Multi-gpu is usually used for model pretraining and fine-tuning for reaction synthesis planning tasks.
