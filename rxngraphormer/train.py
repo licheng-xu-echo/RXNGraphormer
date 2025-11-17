@@ -842,24 +842,6 @@ class SequenceTrainer():
             pretrained_config = Box(pretrained_config_dict)
             ckpt_file = f"{self.config.model.pretrained_model_path}/model/valid_checkpoint.pt"
             ckpt_inf = torch.load(ckpt_file,map_location="cpu")
-
-            '''
-            pretrained_model = RXNGClassifier(emb_dim=pretrained_config.model.emb_dim,
-                                            gnn_type=pretrained_config.model.gnn_type,
-                                            gnn_aggr=pretrained_config.model.gnn_aggr,
-                                            gnum_layer=pretrained_config.model.gnn_num_layer,
-                                            node_readout=pretrained_config.model.node_readout,
-                                            num_heads=pretrained_config.model.num_heads,
-                                            JK=pretrained_config.model.gnn_jk,
-                                            graph_pooling=pretrained_config.model.graph_pooling,
-                                            tnum_layer=pretrained_config.model.trans_num_layer,
-                                            trans_readout=pretrained_config.model.trans_readout,
-                                            onum_layer=pretrained_config.model.output_num_layer,
-                                            drop_ratio=pretrained_config.model.drop_ratio,
-                                            output_size=2,split_process=True,
-                                            split_merge_method=pretrained_config.model.split_merge_method,
-                                            output_act_func=pretrained_config.model.output_act_func)
-            '''
             
             input_param = {"emb_dim":pretrained_config.model.emb_dim,
                         "gnn_type":pretrained_config.model.gnn_type,
@@ -915,7 +897,14 @@ class SequenceTrainer():
             logging.info("[INFO] Freeze pretrained model")
             for param in self.model.encoder.parameters():
                 param.requires_grad = False
-                
+        if self.config.model.prev_model_path:
+            logging.info("[INFO] Loading previous checkpoint file, and continue training")
+            prev_ckpt_file = f"{self.config.model.prev_model_path}/model/valid_checkpoint.pt"
+            prev_ckpt_inf = torch.load(prev_ckpt_file,map_location=self.device)
+            self.model.load_state_dict(update_dict_key(prev_ckpt_inf['model_state_dict']))
+            
+            #prev_model_stat = torch.load(f"{self.config.model.prev_model_path}/model/valid_checkpoint.pt")qweqweqwewq
+        
         if not self.multi_gpu:
             self.model.to(self.device)
         else:
@@ -1261,7 +1250,7 @@ class SequenceTrainer():
             
     def init_optimizer(self):
         
-        if hasattr(self.config.model,"pretrained_model_path") and self.config.model.pretrained_model_path and not self.config.model.pretrained_model_freeze:
+        if hasattr(self.config.model,"pretrained_model_path") and self.config.model.pretrained_model_path and not self.config.model.pretrained_model_freeze and not self.config.model.prev_model_path:
             if not self.multi_gpu:
                 param_lst = [{'params': filter(lambda p: p.requires_grad, self.model.encoder.parameters()), 'lr': self.config.optimizer.learning_rate * self.config.model.pretrained_lr_scaled_coef},
                             {'params': filter(lambda p: p.requires_grad, self.model.attention_encoder.parameters()), 'lr': self.config.optimizer.learning_rate},
@@ -1272,6 +1261,19 @@ class SequenceTrainer():
                             {'params': filter(lambda p: p.requires_grad, self.model.module.attention_encoder.parameters()), 'lr': self.config.optimizer.learning_rate},
                             {'params': filter(lambda p: p.requires_grad, self.model.module.decoder.parameters()), 'lr': self.config.optimizer.learning_rate},
                             {'params': filter(lambda p: p.requires_grad, self.model.module.output_layer.parameters()), 'lr': self.config.optimizer.learning_rate}]
+        
+        elif hasattr(self.config.model,"pretrained_model_path") and self.config.model.pretrained_model_path and not self.config.model.pretrained_model_freeze and self.config.model.prev_model_path:
+            if not self.multi_gpu:
+                param_lst = [{'params': filter(lambda p: p.requires_grad, self.model.encoder.parameters()), 'lr': self.config.optimizer.learning_rate},
+                            {'params': filter(lambda p: p.requires_grad, self.model.attention_encoder.parameters()), 'lr': self.config.optimizer.learning_rate},
+                            {'params': filter(lambda p: p.requires_grad, self.model.decoder.parameters()), 'lr': self.config.optimizer.learning_rate},
+                            {'params': filter(lambda p: p.requires_grad, self.model.output_layer.parameters()), 'lr': self.config.optimizer.learning_rate}]
+            else:
+                param_lst = [{'params': filter(lambda p: p.requires_grad, self.model.module.encoder.parameters()), 'lr': self.config.optimizer.learning_rate},
+                            {'params': filter(lambda p: p.requires_grad, self.model.module.attention_encoder.parameters()), 'lr': self.config.optimizer.learning_rate},
+                            {'params': filter(lambda p: p.requires_grad, self.model.module.decoder.parameters()), 'lr': self.config.optimizer.learning_rate},
+                            {'params': filter(lambda p: p.requires_grad, self.model.module.output_layer.parameters()), 'lr': self.config.optimizer.learning_rate}]
+        
             
         if self.config.optimizer.optimizer.lower() == 'adamw':
             if hasattr(self.config.model,"pretrained_model_path") and self.config.model.pretrained_model_path and not self.config.model.pretrained_model_freeze:
