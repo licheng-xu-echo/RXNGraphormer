@@ -22,23 +22,6 @@ class SPLITClassifierTrainer():
         self.config = config
         self.multi_gpu = self.config.others.multi_gpu
         
-        '''
-        self.model = RXNGClassifier(emb_dim=self.config.model.emb_dim,
-                                    gnn_type=self.config.model.gnn_type,
-                                    gnn_aggr=self.config.model.gnn_aggr,
-                                    gnum_layer=self.config.model.gnn_num_layer,
-                                    node_readout=self.config.model.node_readout,
-                                    num_heads=self.config.model.num_heads,
-                                    JK=self.config.model.gnn_jk,
-                                    graph_pooling=self.config.model.graph_pooling,
-                                    tnum_layer=self.config.model.trans_num_layer,
-                                    trans_readout=self.config.model.trans_readout,
-                                    onum_layer=self.config.model.output_num_layer,
-                                    drop_ratio=self.config.model.drop_ratio,
-                                    output_size=2,split_process=True,
-                                    split_merge_method=self.config.model.split_merge_method,
-                                    output_act_func=self.config.model.output_act_func)
-        '''
         input_param = {"emb_dim":self.config.model.emb_dim,
                         "gnn_type":self.config.model.gnn_type,
                         "gnn_aggr":self.config.model.gnn_aggr,
@@ -98,7 +81,10 @@ class SPLITClassifierTrainer():
         self.init_scheduler()
         
         if self.config.training.loss.lower() == 'ce':
-            self.loss_func = torch.nn.CrossEntropyLoss(reduction="mean")
+            if not hasattr(self.config.training.loss,'weight') or self.config.training.loss.weight is False:
+                self.loss_func = torch.nn.CrossEntropyLoss(reduction="mean")
+            else:
+                self.loss_func = torch.nn.CrossEntropyLoss(weight=torch.tensor(self.config.training.loss.weight).to(self.device), reduction="mean")
         else:
             raise NotImplementedError(f'Loss function {self.config.training.loss} is not implemented yet.')
         if self.multi_gpu and dist.get_rank() == 0:
@@ -108,40 +94,69 @@ class SPLITClassifierTrainer():
             logging.info(f'[INFO] Load reactant dataset {self.config.data.data_path}/{self.config.data.rct_name_regrex}, file trunck {self.config.data.file_num_trunck}, data trunck {self.config.data.data_trunck}...')
             logging.info(f'[INFO] Load product dataset {self.config.data.data_path}/{self.config.data.pdt_name_regrex}, file trunck {self.config.data.file_num_trunck}, data trunck {self.config.data.data_trunck}...')
 
-        
-        self.rct_dataset = MultiRXNDataset(root=self.config.data.data_path,name_regrex=self.config.data.rct_name_regrex,
-                                           trunck=self.config.data.data_trunck,task=self.config.data.task,file_num_trunck=self.config.data.file_num_trunck,
-                                           name_tag='rct')
-        self.pdt_dataset = MultiRXNDataset(root=self.config.data.data_path,name_regrex=self.config.data.pdt_name_regrex,
-                                           trunck=self.config.data.data_trunck,task=self.config.data.task,file_num_trunck=self.config.data.file_num_trunck,
-                                           name_tag='pdt')
-        assert len(self.rct_dataset) == len(self.pdt_dataset), 'The number of reactant and product data are not equal.'
-        #self.dataset = PairDataset(self.rct_dataset,self.pdt_dataset)
-        
-        self.split_ids_map = get_idx_split(len(self.rct_dataset), 
-                                           int(self.config.data.train_ratio*len(self.rct_dataset)), 
-                                           int(self.config.data.valid_ratio*len(self.rct_dataset)), 
-                                           self.config.data.seed)
-        
-        self.train_rct_dataset = self.rct_dataset[self.split_ids_map['train']]
-        self.valid_rct_dataset = self.rct_dataset[self.split_ids_map['valid']]
-        self.train_pdt_dataset = self.pdt_dataset[self.split_ids_map['train']]
-        self.valid_pdt_dataset = self.pdt_dataset[self.split_ids_map['valid']]
+        if self.config.data.rct_name_regrex:
+            self.rct_dataset = MultiRXNDataset(root=self.config.data.data_path,name_regrex=self.config.data.rct_name_regrex,
+                                            trunck=self.config.data.data_trunck,task=self.config.data.task,file_num_trunck=self.config.data.file_num_trunck,
+                                            name_tag='rct')
+            self.pdt_dataset = MultiRXNDataset(root=self.config.data.data_path,name_regrex=self.config.data.pdt_name_regrex,
+                                            trunck=self.config.data.data_trunck,task=self.config.data.task,file_num_trunck=self.config.data.file_num_trunck,
+                                            name_tag='pdt')
+            assert len(self.rct_dataset) == len(self.pdt_dataset), 'The number of reactant and product data are not equal.'
+            #self.dataset = PairDataset(self.rct_dataset,self.pdt_dataset)
+            
+            self.split_ids_map = get_idx_split(len(self.rct_dataset), 
+                                            int(self.config.data.train_ratio*len(self.rct_dataset)), 
+                                            int(self.config.data.valid_ratio*len(self.rct_dataset)), 
+                                            self.config.data.seed)
+            
+            self.train_rct_dataset = self.rct_dataset[self.split_ids_map['train']]
+            self.valid_rct_dataset = self.rct_dataset[self.split_ids_map['valid']]
+            self.train_pdt_dataset = self.pdt_dataset[self.split_ids_map['train']]
+            self.valid_pdt_dataset = self.pdt_dataset[self.split_ids_map['valid']]
+            
+            # for pre-train task, test set is unnecessary, so we use valid set as test set
+            self.test_rct_dataset = self.valid_rct_dataset
+            self.test_pdt_dataset = self.valid_pdt_dataset
+        else:
+            self.train_rct_dataset = MultiRXNDataset(root=self.config.data.data_path,name_regrex=self.config.data.train_rct_name_regrex,
+                                            trunck=self.config.data.data_trunck,task=self.config.data.task,file_num_trunck=self.config.data.file_num_trunck,
+                                            name_tag='rct')
+            self.train_pdt_dataset = MultiRXNDataset(root=self.config.data.data_path,name_regrex=self.config.data.train_pdt_name_regrex,
+                                            trunck=self.config.data.data_trunck,task=self.config.data.task,file_num_trunck=self.config.data.file_num_trunck,
+                                            name_tag='pdt')
+            self.valid_rct_dataset = MultiRXNDataset(root=self.config.data.data_path,name_regrex=self.config.data.valid_rct_name_regrex,
+                                            trunck=self.config.data.data_trunck,task=self.config.data.task,file_num_trunck=self.config.data.file_num_trunck,
+                                            name_tag='rct')
+            self.valid_pdt_dataset = MultiRXNDataset(root=self.config.data.data_path,name_regrex=self.config.data.valid_pdt_name_regrex,
+                                            trunck=self.config.data.data_trunck,task=self.config.data.task,file_num_trunck=self.config.data.file_num_trunck,
+                                            name_tag='pdt')
+            self.test_rct_dataset = MultiRXNDataset(root=self.config.data.data_path,name_regrex=self.config.data.test_rct_name_regrex,
+                                            trunck=self.config.data.data_trunck,task=self.config.data.task,file_num_trunck=self.config.data.file_num_trunck,
+                                            name_tag='rct')
+            self.test_pdt_dataset = MultiRXNDataset(root=self.config.data.data_path,name_regrex=self.config.data.test_pdt_name_regrex,
+                                            trunck=self.config.data.data_trunck,task=self.config.data.task,file_num_trunck=self.config.data.file_num_trunck,
+                                            name_tag='pdt')
 
         if not self.multi_gpu:
             self.train_dataset = PairDataset(self.train_rct_dataset,self.train_pdt_dataset)
             self.valid_dataset = PairDataset(self.valid_rct_dataset,self.valid_pdt_dataset)
+            self.test_dataset = PairDataset(self.test_rct_dataset,self.test_pdt_dataset)
             
             self.train_dataloader = torch.utils.data.DataLoader(self.train_dataset, batch_size=self.config.data.batch_size, shuffle=True,collate_fn=pair_collate_fn)
-            self.valid_dataloader = torch.utils.data.DataLoader(self.valid_dataset, batch_size=self.config.data.batch_size, shuffle=False,collate_fn=pair_collate_fn)  ## TODO
+            self.valid_dataloader = torch.utils.data.DataLoader(self.valid_dataset, batch_size=self.config.data.batch_size, shuffle=False,collate_fn=pair_collate_fn)
+            self.test_dataloader = torch.utils.data.DataLoader(self.test_dataset, batch_size=self.config.data.batch_size, shuffle=False,collate_fn=pair_collate_fn)
         else:
             self.train_dataset = PairDataset(self.train_rct_dataset,self.train_pdt_dataset)
             self.valid_dataset = PairDataset(self.valid_rct_dataset,self.valid_pdt_dataset)
+            self.test_dataset = PairDataset(self.test_rct_dataset,self.test_pdt_dataset)
             train_sampler = torch.utils.data.distributed.DistributedSampler(self.train_dataset, shuffle=True)
             valid_sampler = torch.utils.data.distributed.DistributedSampler(self.valid_dataset, shuffle=False)
+            test_sampler = torch.utils.data.distributed.DistributedSampler(self.test_dataset, shuffle=False)
             self.train_dataloader = DataLoader(self.train_dataset, batch_size=self.config.data.batch_size//self.device_num, sampler=train_sampler,
                                             num_workers=0)
             self.valid_dataloader = DataLoader(self.valid_dataset, batch_size=self.config.data.batch_size//self.device_num, sampler=valid_sampler,
+                                            num_workers=0)
+            self.test_dataloader = DataLoader(self.test_dataset, batch_size=self.config.data.batch_size//self.device_num, sampler=test_sampler,
                                             num_workers=0)
             
         if self.config.model.pretrained_model:
@@ -266,6 +281,7 @@ class SPLITClassifierTrainer():
             preds = torch.Tensor([]).to(self.local_rank)
             targets = torch.Tensor([]).to(self.local_rank)
             dataloader.sampler.set_epoch(self.epoch)
+        loss_accum = 0
         with torch.no_grad():
             for step, batch_data in enumerate(dataloader):
                 rct_data,pdt_data = batch_data
@@ -276,14 +292,22 @@ class SPLITClassifierTrainer():
                     rct_data = rct_data.to(self.local_rank)
                     pdt_data = pdt_data.to(self.local_rank)
                 out = self.model([rct_data,pdt_data])
+                loss = self.loss_func(out, rct_data.y)
+                loss_accum += loss.detach().cpu().item()
                 pred = torch.argmax(out, dim=1)
+                
                 preds = torch.cat([preds, pred.detach_()], dim=0)
                 targets = torch.cat([targets, rct_data.y.unsqueeze(1)], dim=0)
-        return (preds == targets.view(-1)).float().mean().cpu().item()
+            loss_ave = loss_accum/(step+1)
+        return (preds == targets.view(-1)).float().mean().cpu().item(),loss_ave
     
     def run(self):
         best_valid = -float('inf')
         best_test = -float('inf')
+        
+        lowest_valid_loss = float('inf')
+        lowest_test_loss = float('inf')
+        
         self.model.zero_grad()
         for self.epoch in range(1, self.config.training.epoch + 1):
             logging.info(f'============= Epoch {self.epoch} =============')
@@ -293,26 +317,42 @@ class SPLITClassifierTrainer():
             train_loss,train_acc = self.train()
 
             logging.info('Evaluating...')
-            valid_acc = self.val(self.valid_dataloader)
-            
+            valid_acc,valid_loss = self.val(self.valid_dataloader)
+            if self.config.data.test_rct_name_regrex:
+                test_acc,test_loss = self.val(self.test_dataloader)
+            else:
+                test_acc = -1
+                test_loss = 99999
             lr_cur = get_lr(self.optimizer)
             
-            logging.info(f'Train loss: {train_loss:.8f}, train acc: {train_acc:.8f}, valid acc: {valid_acc:.8f}, lr: {lr_cur}')
+            logging.info(f'Train loss: {train_loss:.4f}, train acc: {train_acc:.4f}, valid acc: {valid_acc:.4f}, loss: {valid_loss:.4f}, test acc: {test_acc:.4f}, loss: {test_loss:.4f}, lr: {lr_cur}')
 
             self.writer.add_scalar('train_loss', train_loss, self.epoch)
             self.writer.add_scalar('valid_acc', valid_acc, self.epoch)
-            
-            if valid_acc > best_valid:
-                best_valid = valid_acc
-                best_test = valid_acc
+            if not hasattr(self.config.model, "save_mode") or self.config.model.save_mode == 'acc':
+                if valid_acc > best_valid:
+                    best_valid = valid_acc
+                    best_test = test_acc
 
-                logging.info('Saving checkpoint...')
-                checkpoint = {'epoch': self.epoch, 
-                                'model_state_dict': self.model.state_dict(), 
-                                'optimizer_state_dict': self.optimizer.state_dict(), 
-                                'scheduler_state_dict': self.scheduler.state_dict(), 
-                                'best_valid_mae': best_valid}
-                torch.save(checkpoint, os.path.join(self.model_save_dir, 'valid_checkpoint.pt'))
+                    logging.info('Saving checkpoint...')
+                    checkpoint = {'epoch': self.epoch, 
+                                    'model_state_dict': self.model.state_dict(), 
+                                    'optimizer_state_dict': self.optimizer.state_dict(), 
+                                    'scheduler_state_dict': self.scheduler.state_dict(), 
+                                    'best_valid_mae': best_valid}
+                    torch.save(checkpoint, os.path.join(self.model_save_dir, 'valid_checkpoint.pt'))
+            else:
+                if valid_loss < lowest_valid_loss:
+                    lowest_valid_loss = valid_loss
+                    best_test = test_acc
+
+                    logging.info('Saving checkpoint...')
+                    checkpoint = {'epoch': self.epoch, 
+                                    'model_state_dict': self.model.state_dict(), 
+                                    'optimizer_state_dict': self.optimizer.state_dict(), 
+                                    'scheduler_state_dict': self.scheduler.state_dict(), 
+                                    'best_valid_mae': lowest_valid_loss}
+                    torch.save(checkpoint, os.path.join(self.model_save_dir, 'valid_checkpoint.pt'))
             if self.config.scheduler.type.lower() == 'steplr':
                 self.scheduler.step()
             #torch.distributed.barrier()  ## 强制同步
@@ -339,32 +379,6 @@ class SPLITRegressorTrainer():
         self.save_dir = f"{self.config.model.save_dir}/{prefix}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
         if not self.config.model.pretrained_model_path:
             logging.info('Training from scratch')
-            '''
-            self.model = RXNGRegressor(emb_dim=self.config.model.emb_dim,
-                                        gnn_type=self.config.model.gnn_type,
-                                        gnn_aggr=self.config.model.gnn_aggr,
-                                        gnum_layer=self.config.model.gnn_num_layer,
-                                        node_readout=self.config.model.node_readout,
-                                        num_heads=self.config.model.num_heads,
-                                        JK=self.config.model.gnn_jk,
-                                        graph_pooling=self.config.model.graph_pooling,
-                                        tnum_layer=self.config.model.trans_num_layer,
-                                        trans_readout=self.config.model.trans_readout,
-                                        onum_layer=self.config.model.output_num_layer,
-                                        drop_ratio=self.config.model.drop_ratio,
-                                        output_size=1,
-                                        output_norm=eval(self.config.model.output_norm),
-                                        split_process=True,
-                                        split_merge_method=self.config.model.split_merge_method,
-                                        output_act_func=self.config.model.output_act_func,
-                                        rct_batch_norm=eval(self.config.model.rct_batch_norm),
-                                        pdt_batch_norm=eval(self.config.model.pdt_batch_norm),
-                                        use_mid_inf=self.use_mid_inf,
-                                        pretrained_mid_encoder=None,
-                                        mid_iteract_method=self.config.model.mid_iteract_method,
-                                        mid_batch_norm=eval(self.config.model.mid_batch_norm),
-                                        mid_layer_num=self.config.model.mid_layer_num)
-            '''
             input_param = {"emb_dim":self.config.model.emb_dim,
                             "gnn_type":self.config.model.gnn_type,
                             "gnn_aggr":self.config.model.gnn_aggr,
@@ -392,13 +406,6 @@ class SPLITRegressorTrainer():
             rxng = RXNGraphormer("regression",align_config(input_param,"regressor"),"") # pretrain models are all None
             self.model = rxng.get_model()
 
-
-
-
-
-
-            
-
         else:
             self.pretrained_model_freeze = self.config.model.pretrained_model_freeze
             self.pretrained_lr_scaled_coef = self.config.model.pretrained_lr_scaled_coef
@@ -410,23 +417,6 @@ class SPLITRegressorTrainer():
             pretrained_config = Box(pretrained_config_dict)
             ckpt_file = f"{self.config.model.pretrained_model_path}/model/valid_checkpoint.pt"
             ckpt_inf = torch.load(ckpt_file,map_location=self.device)
-            '''
-            self.pretrained_model = RXNGClassifier(emb_dim=pretrained_config.model.emb_dim,
-                                                    gnn_type=pretrained_config.model.gnn_type,
-                                                    gnn_aggr=pretrained_config.model.gnn_aggr,
-                                                    gnum_layer=pretrained_config.model.gnn_num_layer,
-                                                    node_readout=pretrained_config.model.node_readout,
-                                                    num_heads=pretrained_config.model.num_heads,
-                                                    JK=pretrained_config.model.gnn_jk,
-                                                    graph_pooling=pretrained_config.model.graph_pooling,
-                                                    tnum_layer=pretrained_config.model.trans_num_layer,
-                                                    trans_readout=pretrained_config.model.trans_readout,
-                                                    onum_layer=pretrained_config.model.output_num_layer,
-                                                    drop_ratio=pretrained_config.model.drop_ratio,
-                                                    output_size=2,split_process=True,
-                                                    split_merge_method=pretrained_config.model.split_merge_method,
-                                                    output_act_func=self.config.model.output_act_func)
-            '''
 
             input_param = {"emb_dim":pretrained_config.model.emb_dim,
                             "gnn_type":pretrained_config.model.gnn_type,
@@ -459,36 +449,7 @@ class SPLITRegressorTrainer():
                 param.requires_grad = False
             for param in pdt_encoder.parameters():
                 param.requires_grad = False    
-
-            '''
-            self.model = RXNGRegressor(emb_dim=self.config.model.emb_dim,
-                                        gnn_type=self.config.model.gnn_type,
-                                        gnn_aggr=self.config.model.gnn_aggr,
-                                        gnum_layer=self.config.model.gnn_num_layer,
-                                        node_readout=self.config.model.node_readout,
-                                        num_heads=self.config.model.num_heads,
-                                        JK=self.config.model.gnn_jk,
-                                        graph_pooling=self.config.model.graph_pooling,
-                                        tnum_layer=self.config.model.trans_num_layer,
-                                        trans_readout=self.config.model.trans_readout,
-                                        onum_layer=self.config.model.output_num_layer,
-                                        drop_ratio=self.config.model.drop_ratio,
-                                        output_size=1,pretrained_rct_encoder=rct_encoder,
-                                        pretrained_pdt_encoder=pdt_encoder,
-                                        output_norm=eval(self.config.model.output_norm),
-                                        split_process=True,
-                                        split_merge_method=self.config.model.split_merge_method,
-                                        output_act_func=self.config.model.output_act_func,
-                                        rct_batch_norm=eval(self.config.model.rct_batch_norm),
-                                        pdt_batch_norm=eval(self.config.model.pdt_batch_norm),
-                                        use_mid_inf=self.use_mid_inf,
-                                        pretrained_mid_encoder=None,
-                                        mid_iteract_method=self.config.model.mid_iteract_method,
-                                        mid_batch_norm=eval(self.config.model.mid_batch_norm),
-                                        mid_layer_num=self.config.model.mid_layer_num)
-                '''
             
-
             input_param = {"emb_dim":self.config.model.emb_dim,
                             "gnn_type":self.config.model.gnn_type,
                             "gnn_aggr":self.config.model.gnn_aggr,
