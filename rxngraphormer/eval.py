@@ -25,6 +25,7 @@ class SeqEval():
         with open(trained_para_json,'r') as fr:
             pretrained_config_dict = json.load(fr)
         trained_config = Box(pretrained_config_dict)
+        self.trained_config = trained_config
         vocab = load_vocab(f'{trained_config.data.data_path}/{trained_config.data.vocab_file}')
         self.vocab_rev = [k for k, v in sorted(vocab.items(), key=lambda tup: tup[1])]
         #model = RXNG2Sequencer(trained_config,vocab)
