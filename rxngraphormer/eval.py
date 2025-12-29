@@ -73,7 +73,7 @@ class SeqEval():
                         smis.append(smi)
                     smis = ",".join(smis)
                     all_predictions.append(smis)
-                    
+        self.all_predictions = all_predictions
         accuracies = np.zeros([len(ground_truth_smiles_lst), self.n_best], dtype=np.float32)
         for i in range(len(ground_truth_smiles_lst)):
             smi_tgt = ground_truth_smiles_lst[i]
