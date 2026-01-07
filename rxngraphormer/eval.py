@@ -8,10 +8,10 @@ from .data import load_vocab,RXNG2SDataset,RXNDataset,get_idx_split,TripleDatase
 from .utils import canonical_smiles,update_dict_key,align_config
 from torch_geometric.loader import DataLoader
 from sklearn.metrics import r2_score,mean_absolute_error
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 class SeqEval():
-    def __init__(self,trained_model_path,topk=10,beam_size=10,temperature=1.0,n_best=10,min_length=1,max_length=512,batch_size=32,ckpt_file="valid_checkpoint.pt"):
+    def __init__(self,trained_model_path,topk=10,beam_size=10,temperature=1.0,n_best=10,min_length=1,max_length=512,batch_size=32,ckpt_file="valid_checkpoint.pt",device='cuda:0'):
         self.trained_model_path = trained_model_path
         self.topk = topk
         self.beam_size = beam_size
@@ -19,7 +19,11 @@ class SeqEval():
         self.n_best = n_best
         self.min_length = min_length
         self.max_length = max_length
-
+        if device != 'cpu':
+            device = torch.device(device if torch.cuda.is_available() else 'cpu')
+        else:
+            device = torch.device(device)
+        self.device = device
         print(f"[INFO] Loading trained model from {trained_model_path}")
         trained_para_json = f"{trained_model_path}/parameters.json"
         with open(trained_para_json,'r') as fr:
@@ -56,7 +60,7 @@ class SeqEval():
             step = 0
             for batch_data in dataloader:
                 step += 1
-                batch_data = batch_data.to(device)
+                batch_data = batch_data.to(self.device)
                 results = self.model.infer(reaction_batch=batch_data,
                                            batch_size=len(batch_data.tgt_lens),
                                             beam_size=self.beam_size,
@@ -91,7 +95,11 @@ class SeqEval():
             print(f"Top-{i+1} Accuracy: {np.mean(self.accuracies[:, i])}")
         return accuracies
     
-def eval_regression_performance(pretrained_model_path,ckpt_file="valid_checkpoint.pt",scale=1.0,specific_val=False,yield_constrain=False,return_train_results=False):
+def eval_regression_performance(pretrained_model_path,ckpt_file="valid_checkpoint.pt",scale=1.0,specific_val=False,yield_constrain=False,return_train_results=False,device='cuda:0'):
+    if device != 'cpu':
+        device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    else:
+        device = torch.device(device)
     pretrained_para_json = f"{pretrained_model_path}/parameters.json"
     with open(pretrained_para_json,'r') as fr:
         pretrained_config_dict = json.load(fr)
@@ -220,7 +228,12 @@ def eval_regression_performance(pretrained_model_path,ckpt_file="valid_checkpoin
 
     return r2,mae,preds,targets
 
-def load_pred_model(pretrained_model_path,ckpt_filename="valid_checkpoint.pt",task_type="reactivity"):
+def load_pred_model(pretrained_model_path,ckpt_filename="valid_checkpoint.pt",task_type="reactivity",device="cuda:0"):
+    if device != 'cpu':
+        device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    else:
+        device = torch.device(device)
+
     assert task_type in ["reactivity","selectivity","retro-synthesis","forward-synthesis"]
     task_type = task_type.lower()
     pretrained_para_json = f"{pretrained_model_path}/parameters.json"
@@ -297,8 +310,12 @@ def get_eval_dataloader(root,data_file_dict,pretrained_model_path,batch_size=4,t
         eval_dataloader = DataLoader(eval_dataset, batch_size=batch_size, shuffle=False)
         return eval_dataloader
     
-def reaction_prediction(model_path, rxn_smiles_lst, task_type, params={"batch_size":4,"beam_size":10,"n_best":10,
+def reaction_prediction(model_path, rxn_smiles_lst, task_type, device='cuda:0', params={"batch_size":4,"beam_size":10,"n_best":10,
                                                                        "temperature":1.0,"min_length":1,"max_length":512}):
+    if device != 'cpu':
+        device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    else:
+        device = torch.device(device)
     from rxngraphormer.midgen.midmol import gen_mech_mid_smi
     task_type = task_type.lower()
     assert len(rxn_smiles_lst) >= 2, "'rxn_smiles_lst' must contain at least 2 reactions"
