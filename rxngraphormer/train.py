@@ -318,7 +318,7 @@ class SPLITClassifierTrainer():
 
             logging.info('Evaluating...')
             valid_acc,valid_loss = self.val(self.valid_dataloader)
-            if self.config.data.test_rct_name_regrex:
+            if hasattr(self.config.data,'test_rct_name_regrex') and self.config.data.test_rct_name_regrex:
                 test_acc,test_loss = self.val(self.test_dataloader)
             else:
                 test_acc = -1
