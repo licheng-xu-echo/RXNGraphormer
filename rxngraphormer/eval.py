@@ -320,7 +320,7 @@ def reaction_prediction(model_path, rxn_smiles_lst, task_type, device='cuda:0', 
     task_type = task_type.lower()
     assert len(rxn_smiles_lst) >= 2, "'rxn_smiles_lst' must contain at least 2 reactions"
     assert task_type in ["reactivity","selectivity","forward-synthesis","retro-synthesis"], "task_type must be 'reactivity', 'selectivity', 'forward-synthesis' or 'retro-synthesis'"
-    model = load_pred_model(model_path, task_type=task_type)
+    model = load_pred_model(model_path, task_type=task_type,device=device)
     if task_type in ["reactivity","selectivity"]:
         rct_smi_lst = [f'{canonical_smiles(smi.split(">>")[0])},0' for smi in rxn_smiles_lst]
         pdt_smi_lst = [f'{canonical_smiles(smi.split(">>")[1])},0' for smi in rxn_smiles_lst]
