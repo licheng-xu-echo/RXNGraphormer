@@ -309,7 +309,7 @@ class RXNG2SDataset(InMemoryDataset):
         self.multi_process = multi_process
         self.oh = oh
         super().__init__(root, transform, pre_transform)
-        self.data, self.slices = torch.load(self.processed_paths[0])
+        self.data, self.slices = torch.load(self.processed_paths[0],weights_only=False)
 
     @property
     def raw_file_names(self):
@@ -416,7 +416,7 @@ class MultiRXNDataset(InMemoryDataset):
         self.slices_lst = []
         self.data_num_lst = [0]
         for processed_path in self.processed_paths:
-            data, slices = torch.load(processed_path)
+            data, slices = torch.load(processed_path,weights_only=False)
             self.data_lst.append(data)
             self.slices_lst.append(slices)
             self.data_num_lst.append(self.data_num_lst[-1]+len(slices['x'])-1)
@@ -504,7 +504,7 @@ class RXNDataset(InMemoryDataset):
         self.mul_ext_readout = mul_ext_readout.lower()
         self.tag = tag
         super().__init__(root, transform, pre_transform)
-        self.data, self.slices = torch.load(self.processed_paths[0])
+        self.data, self.slices = torch.load(self.processed_paths[0],weights_only=False)
 
     @property
     def raw_file_names(self):

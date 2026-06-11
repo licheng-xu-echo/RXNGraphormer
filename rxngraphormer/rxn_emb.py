@@ -14,27 +14,8 @@ class RXNEMB():
             pretrained_config_dict = json.load(fr)
         pretrained_config = Box(pretrained_config_dict)
         ckpt_file = f"{pretrained_model_path}/model/valid_checkpoint.pt"
-        ckpt_inf = torch.load(ckpt_file,map_location=device)
+        ckpt_inf = torch.load(ckpt_file,map_location=device,weights_only=False)
         if model_type == "classifier":
-            '''
-            model = RXNGClassifier(emb_dim=pretrained_config.model.emb_dim,
-                                    gnn_type=pretrained_config.model.gnn_type,
-                                    gnn_aggr=pretrained_config.model.gnn_aggr,
-                                    gnum_layer=pretrained_config.model.gnn_num_layer,
-                                    node_readout=pretrained_config.model.node_readout,
-                                    num_heads=pretrained_config.model.num_heads,
-                                    JK=pretrained_config.model.gnn_jk,
-                                    graph_pooling=pretrained_config.model.graph_pooling,
-                                    tnum_layer=pretrained_config.model.trans_num_layer,
-                                    trans_readout=pretrained_config.model.trans_readout,
-                                    onum_layer=pretrained_config.model.output_num_layer,
-                                    drop_ratio=pretrained_config.model.drop_ratio,
-                                    output_size=2,split_process=True,
-                                    split_merge_method=pretrained_config.model.split_merge_method,
-                                    output_act_func=pretrained_config.model.output_act_func)
-            '''
-
-
             input_param = {"emb_dim":pretrained_config.model.emb_dim,
                             "gnn_type":pretrained_config.model.gnn_type,
                             "gnn_aggr":pretrained_config.model.gnn_aggr,
@@ -56,33 +37,6 @@ class RXNEMB():
 
 
         elif model_type == "regressor":
-            '''
-            model = RXNGRegressor(emb_dim=pretrained_config.model.emb_dim,
-                                gnn_type=pretrained_config.model.gnn_type,
-                                gnn_aggr=pretrained_config.model.gnn_aggr,
-                                gnum_layer=pretrained_config.model.gnn_num_layer,
-                                node_readout=pretrained_config.model.node_readout,
-                                num_heads=pretrained_config.model.num_heads,
-                                JK=pretrained_config.model.gnn_jk,
-                                graph_pooling=pretrained_config.model.graph_pooling,
-                                tnum_layer=pretrained_config.model.trans_num_layer,
-                                trans_readout=pretrained_config.model.trans_readout,
-                                onum_layer=pretrained_config.model.output_num_layer,
-                                drop_ratio=pretrained_config.model.drop_ratio,
-                                output_size=1,
-                                output_norm=eval(pretrained_config.model.output_norm),
-                                split_process=True,
-                                split_merge_method=pretrained_config.model.split_merge_method,
-                                output_act_func=pretrained_config.model.output_act_func,
-                                rct_batch_norm=eval(pretrained_config.model.rct_batch_norm),
-                                pdt_batch_norm=eval(pretrained_config.model.pdt_batch_norm),
-                                use_mid_inf=pretrained_config.model.use_mid_inf,
-                                pretrained_mid_encoder=None,
-                                mid_iteract_method=pretrained_config.model.mid_iteract_method,
-                                mid_batch_norm=eval(pretrained_config.model.mid_batch_norm),
-                                mid_layer_num=pretrained_config.model.mid_layer_num)
-            '''
-
 
             input_param = {"emb_dim":pretrained_config.model.emb_dim,
                             "gnn_type":pretrained_config.model.gnn_type,

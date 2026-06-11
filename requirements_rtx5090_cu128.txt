@@ -1,0 +1,34 @@
+# RTX 5090 / Blackwell (sm_120) environment for RXNGraphormer GPU training.
+#
+# Install PyTorch and PyG CUDA wheels first:
+#
+#   pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 \
+#       --index-url https://download.pytorch.org/whl/cu128
+#   pip install pyg-lib torch_scatter torch_sparse torch_cluster torch_spline_conv \
+#       -f https://data.pyg.org/whl/torch-2.7.0+cu128.html
+#   pip install -r requirements_rtx5090_cu128.txt
+#   pip install -e .
+#
+# Why PyTorch 2.7.0+cu128:
+# - PyTorch 2.7 introduced official NVIDIA Blackwell support and CUDA 12.8 wheels.
+# - PyG publishes matching wheels for torch-2.7.0+cu128.
+#
+# Note about localmapper/DGL:
+# - localmapper is required when generating *_mid.csv in this same environment.
+# - localmapper depends on DGL/dgllife. If DGL/localmapper cannot use CUDA,
+#   rxngraphormer.midgen.midmol falls back to CPU for mid-generation while
+#   RXNGraphormer training can still use cuda:0.
+
+numpy==1.26.4
+rdkit==2024.3.2
+pandas
+python-box
+OpenNMT-py==1.2.0
+torch_geometric
+rxnmapper
+transformers==4.30.0
+scikit-learn
+tensorboard
+tqdm
+setuptools<81
+

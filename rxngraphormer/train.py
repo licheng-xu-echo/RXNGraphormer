@@ -160,7 +160,7 @@ class SPLITClassifierTrainer():
                                             num_workers=0)
             
         if self.config.model.pretrained_model:
-            pretrained_inf = torch.load(f'{self.config.model.pretrained_model}/model/valid_checkpoint.pt')
+            pretrained_inf = torch.load(f'{self.config.model.pretrained_model}/model/valid_checkpoint.pt',weights_only=False)
             model_state_dict = pretrained_inf['model_state_dict']
             optimizer_state_dict = pretrained_inf['optimizer_state_dict']
             scheduler_state_dict = pretrained_inf['scheduler_state_dict']
@@ -416,7 +416,7 @@ class SPLITRegressorTrainer():
                 pretrained_config_dict = json.load(fr)
             pretrained_config = Box(pretrained_config_dict)
             ckpt_file = f"{self.config.model.pretrained_model_path}/model/valid_checkpoint.pt"
-            ckpt_inf = torch.load(ckpt_file,map_location=self.device)
+            ckpt_inf = torch.load(ckpt_file,map_location=self.device,weights_only=False)
 
             input_param = {"emb_dim":pretrained_config.model.emb_dim,
                             "gnn_type":pretrained_config.model.gnn_type,
@@ -802,7 +802,7 @@ class SequenceTrainer():
                 pretrained_config_dict = json.load(fr)
             pretrained_config = Box(pretrained_config_dict)
             ckpt_file = f"{self.config.model.pretrained_model_path}/model/valid_checkpoint.pt"
-            ckpt_inf = torch.load(ckpt_file,map_location="cpu")
+            ckpt_inf = torch.load(ckpt_file,map_location="cpu",weights_only=False)
 
             '''
             pretrained_model = RXNGClassifier(emb_dim=pretrained_config.model.emb_dim,

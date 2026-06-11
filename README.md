@@ -45,6 +45,23 @@ pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -
 pip install rdkit==2024.3.2 ipykernel pandas python-box OpenNMT-py==1.2.0 torchdata==0.7.1 torch_geometric rxnmapper localmapper transformers==4.30.0 numpy==1.26.4 scikit-learn
 pip install .
 ```
+**Update:** If your GPU device support sm_120 (e.g. RTX 5090), you can prepare environment by running the following command:
+
+```bash
+conda create -n rxngraphormer-cu128 python=3.10 -y
+conda activate rxngraphormer-cu128
+cd RXNGraphormer
+
+pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 \
+  --index-url https://download.pytorch.org/whl/cu128
+
+pip install pyg-lib torch_scatter torch_sparse torch_cluster torch_spline_conv \
+  -f https://data.pyg.org/whl/torch-2.7.0+cu128.html
+
+pip install -r requirements_rtx5090_cu128.txt
+pip install -e .
+```
+
 
 **Note:** All codes were tested under Ubuntu 22.04.4 LTS
 

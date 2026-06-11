@@ -37,7 +37,7 @@ class SeqEval():
         model = rxng.get_model()
 
         ckpt_file = f"{trained_model_path}/model/{ckpt_file}"
-        ckpt_inf = torch.load(ckpt_file,map_location=device)
+        ckpt_inf = torch.load(ckpt_file,map_location=device,weights_only=False)
         
         model.to(device)
         model.load_state_dict(update_dict_key(ckpt_inf['model_state_dict']))
@@ -106,7 +106,7 @@ def eval_regression_performance(pretrained_model_path,ckpt_file="valid_checkpoin
     pretrained_config = Box(pretrained_config_dict)
 
     ckpt_file = f"{pretrained_model_path}/model/{ckpt_file}"
-    ckpt_inf = torch.load(ckpt_file,map_location=device)
+    ckpt_inf = torch.load(ckpt_file,map_location=device,weights_only=False)
     
     input_param = {"emb_dim":pretrained_config.model.emb_dim,
                     "gnn_type":pretrained_config.model.gnn_type,
@@ -242,7 +242,7 @@ def load_pred_model(pretrained_model_path,ckpt_filename="valid_checkpoint.pt",ta
     pretrained_config = Box(pretrained_config_dict)
 
     ckpt_file = f"{pretrained_model_path}/model/{ckpt_filename}"
-    ckpt_inf = torch.load(ckpt_file,map_location=device)
+    ckpt_inf = torch.load(ckpt_file,map_location=device,weights_only=False)
     if task_type in ["reactivity","selectivity"]:
         
         input_param = {"emb_dim":pretrained_config.model.emb_dim,
