@@ -182,3 +182,4 @@ dataset/*/
 dataset/*.csv
 notebook/*.png
 dev/
+results/

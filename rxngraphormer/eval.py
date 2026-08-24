@@ -1,4 +1,4 @@
-import torch,json,os,shutil
+import torch,json,os,shutil,datetime
 import pandas as pd
 import numpy as np
 from rdkit import Chem
@@ -11,7 +11,8 @@ from sklearn.metrics import r2_score,mean_absolute_error
 #device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 class SeqEval():
-    def __init__(self,trained_model_path,topk=10,beam_size=10,temperature=1.0,n_best=10,min_length=1,max_length=512,batch_size=32,ckpt_file="valid_checkpoint.pt",device='cuda:0'):
+    def __init__(self,trained_model_path,topk=10,beam_size=10,temperature=1.0,n_best=10,min_length=1,
+                 max_length=512,batch_size=32,ckpt_file="valid_checkpoint.pt",device='cuda:0',save_prediction=False):
         self.trained_model_path = trained_model_path
         self.topk = topk
         self.beam_size = beam_size
@@ -24,6 +25,7 @@ class SeqEval():
         else:
             device = torch.device(device)
         self.device = device
+        self.save_prediction = save_prediction
         print(f"[INFO] Loading trained model from {trained_model_path}")
         trained_para_json = f"{trained_model_path}/parameters.json"
         with open(trained_para_json,'r') as fr:
@@ -79,6 +81,10 @@ class SeqEval():
                     smis = ",".join(smis)
                     all_predictions.append(smis)
         self.all_predictions = all_predictions
+        if self.save_prediction:
+            os.makedirs(self.save_prediction, exist_ok=True)
+            with open(f"{self.save_prediction}/prediction_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv", "w") as f:
+                f.writelines("\n".join([''.join(item.split()) for item in all_predictions]))
         accuracies = np.zeros([len(ground_truth_smiles_lst), self.n_best], dtype=np.float32)
         for i in range(len(ground_truth_smiles_lst)):
             smi_tgt = ground_truth_smiles_lst[i]

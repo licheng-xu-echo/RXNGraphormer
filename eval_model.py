@@ -16,7 +16,7 @@ def main():
         seq_eval = SeqEval(trained_model_path=config.trained_model_path,ckpt_file=config.ckpt_file,
                             topk=config.topk,beam_size=config.beam_size,temperature=config.temperature,
                             n_best=config.n_best,min_length=config.min_length,max_length=config.max_length,
-                            batch_size=config.batch_size)
+                            batch_size=config.batch_size,save_prediction=config.save_prediction,device=device)
         acc = seq_eval.eval(seq_eval.test_dataloader,seq_eval.test_ground_truth_smiles_lst)
     elif config.task == "regression":
         r2,mae,preds,targets = eval_regression_performance(config.trained_model_path,ckpt_file=config.ckpt_file, scale=config.scale,yield_constrain=config.yield_constrain)
